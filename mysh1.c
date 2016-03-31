@@ -6,30 +6,32 @@
 
 int main(int argc, char* argv[])
 {
-   char  fileName[55];
+   char  fileName[255];
    pid_t pid;	
    
-   pid = fork(); 
+   
 
 
    switch (pid = fork()) {
-	   case 0:
-		exec(fileName);
-		
-      	   default:	 
-         //Infinite Loop   
-         while(1){
-	   printf(" %s > ", argv[0]);
+	   case -1: //Did not fork properly
+		perror("fork");
+		break;
 
-	   scanf("%s", fileName); // gets filename
-	   if (fileName[0] == '\0') continue;
-	   printf("\n Entered file: %s",fileName); // prints the fileName
-	
-	  
-	
-
-			
-   	}
+	   case 0: //child
+		execvp(fileName[0],fileName);
+		puts("Oh my. If this prints, execv() must have failed");
+		exit(EXIT_FAILURE);
+		break;
+      	   default: //parent
+		 //Infinite Loop   
+		 while(1){
+		   printf(" %s > ", argv[0]);
+		   scanf("%s", fileName); // gets filename
+		   if (fileName[0] == '\0') continue;
+		   printf("\n Entered file: %s",fileName); // prints the fileName
+		   //wait()
+				
+	   	}
    }
 
 
