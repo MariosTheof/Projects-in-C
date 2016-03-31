@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 	   printf(" %s > ", argv[0]);
 
 	   scanf("%s", fileName); // gets filename
-	   if (fileName[0] == NULL) continue;
+	   if (fileName[0] == '\0') continue;
 	   printf("\n Entered file: %s",fileName); // prints the fileName
 	
 	  
