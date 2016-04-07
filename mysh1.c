@@ -1,8 +1,10 @@
 /* My first personal shell */
 #include<stdio.h>
 #include<stdlib.h>
-#include<unistd.h>
-#include<sys/types.h>
+#include<unistd.h> /* for fork() */
+#include<sys/types.h> /* for pid_t */
+#include<sys/wait.h> /* fpr wait() */
+
 
 int main(int argc, char* argv[])
 {
@@ -18,7 +20,10 @@ int main(int argc, char* argv[])
 		break;
 
 	   case 0: //child
-		execvp(fileName[0],fileName);
+		 //execv(fileName[0],fileName);
+		static char *argv[] = { "echo", "Foo is my name." , NULL };
+		execv("/bin/echo", argv);
+		
 		puts("Oh my. If this prints, execv() must have failed");
 		exit(EXIT_FAILURE);
 		break;
@@ -29,8 +34,8 @@ int main(int argc, char* argv[])
 		   scanf("%s", fileName); // gets filename
 		   if (fileName[0] == '\0') continue;
 		   printf("\n Entered file: %s",fileName); // prints the fileName
-		   //wait()
-				
+		   waitpid(pid,0,0); /* wait for child to exit() */
+		   break;
 	   	}
    }
 
