@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 			cmd = 0;
 		}// /while
 
-		if (getchar() == EOF)
+		if (feof(stdin))
 		{
 		break;
 		}
@@ -37,12 +37,17 @@ int main(int argc, char* argv[])
 		*argv = 0;
 		
 
-		
-
 		pid = fork();
 		if (pid == 0){
+		
+		/*execlp goes first to run a shell command if there is one.
+		If not, then execv will execute a file of our own. */
+		execlp(args[0],args[0], args[1],NULL);
+
 		execv(args[0], args);
+
 		fprintf(stderr, "Oops! \n");
+		break;
 		} // /if
 		waitPid = wait(&status);
 
