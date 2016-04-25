@@ -7,6 +7,8 @@
 
 char fileName[256];
 char *args[129];
+pid_t pid,waitPid;
+int status;
 
 /*Reads a line from the terminal */
 void readLine(void)
@@ -36,11 +38,42 @@ void readLine(void)
 
 
 
+/*Executes a command */
+void process(void){
+	switch(pid = fork()) {
+	  case -1:
+		printf("panic: can't fork \n");
+		exit(-1);
+	  case 0:
+		execlp(args[0], args[0], args[1], NULL);
+
+		execv(args[0], args);
+
+		fprintf(stderr, "Ooops! \n");
+		break;
+
+	  default:
+		waitPid = wait(&status);
+
+
+	}
+}
+
+/*Checks for a special symbol */
+char checkForSymbol(void){
+	int i;
+	char c;
+	for (i = 0; args[i] != '\0'; i++) {
+	  if (!strcmp(args[i], ">"))
+		return args[i][0];
+	  }
+	if (!strcmp(args[i], ">"))
+		return args[i][0];
+	  }
+}
+
 int main(int argc, char* argv[])
 {
-	pid_t pid,waitPid;
-	int status;
-	
 
 	while(1)
 	{
@@ -49,24 +82,15 @@ int main(int argc, char* argv[])
 
   	readLine();
 
+
 	if (feof(stdin)){
+		break;
+	}else if (!strcmp(args[0], "exit" )){
 		break;
 	}
 
-		pid = fork();
-		if (pid == 0){
-
-		/*execlp goes first to run a shell command if there is one.
-		If not, then execv will execute a file of our own. */
-		execlp(args[0],args[0], args[1],NULL);
-
-		execv(args[0], args);
-
-		fprintf(stderr, "Oops! \n");
-		break;
-
-		} // /if
-		waitPid = wait(&status);
+	
+	process();
 
 
 	} // /while
