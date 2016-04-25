@@ -5,6 +5,9 @@
 #include<sys/types.h> /* for pid_t */
 #include<sys/wait.h> /* fpr wait() */
 
+char fileName[256];
+char *args[129];
+
 /*Reads a line from the terminal */
 void readLine(void)
 {
@@ -13,7 +16,7 @@ void readLine(void)
 
 		fileName[strcspn(fileName, "\n")] = '\0'; //strcspn = string span ?
 
-			char *args[129];
+			
 			char **argv = args;
 			char *cmd = fileName;
 			const char *whisp = " \t\f\r\b\n";
@@ -25,10 +28,7 @@ void readLine(void)
 				cmd = 0;
 			}// /while
 
-			if (feof(stdin){
-			break;
-			}
-
+			
 			*argv = 0;
 	}
 
@@ -40,14 +40,18 @@ int main(int argc, char* argv[])
 {
 	pid_t pid,waitPid;
 	int status;
-	char fileName[256];
+	
 
 	while(1)
 	{
 
 	printf(" %s > ", argv[0]);
 
-  readLine();
+  	readLine();
+
+	if (feof(stdin)){
+		break;
+	}
 
 		pid = fork();
 		if (pid == 0){
