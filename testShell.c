@@ -56,6 +56,7 @@ void process(void){
 			fprintf(stderr, "Oops! \n");
 			break;
 
+
 		default:
 			waitPid = wait(&status);
 		}
@@ -71,13 +72,15 @@ char findSpecialSymbol(void){
 	 return args[i][0];
 		if (!strcmp(args[i], "<"))
 			 return args[i][0];
+		if (!strcmp(args[i], "|"))
+			return args[i][0];
 	}
 	return '\0';
 }
 
 //Splits one command with arguments into two commands with arguments
 void extractCommand(char* symbol) {
-  int i = 0;
+  int i;
   int count = 0;
   for (i = 0; args[i] != NULL; i++)
       if (!strcmp(args[i], symbol)) {
@@ -126,7 +129,7 @@ void inRedirection(void) {
   if (pid == 0) {
       close(0);
       //open the file args2[0] and use it as standard input
-      fd = open(args2[0], O_RDONLY);
+      fd = open(args2[0], O_RDWR);
       execvp(args[0], args);
       perror("execv");
       exit(1);
@@ -139,7 +142,25 @@ void inRedirection(void) {
   }
 }
 
+void piping(void) {
+	extractCommand("|");
+	int fd[2];
+	if(pipe(fd) < 0)
+		printf ("Cannot get a pipe\n");
+	if ((pid = fork()) == 0){
+		close(1);
+		dup(fd[1]);
+		close(fd[0]);
+		execvp(args[0],args);
+	} else if (pid > 0) {
+			close(0);
+			dup(fd[0]);
+			close(fd[1]);
+			execvp(args2[0],args2);
+	} else
+		printf("Unable to fork \n");
 
+}
 
 
 int main(int argc, char* argv[])
@@ -162,6 +183,8 @@ int main(int argc, char* argv[])
 								break;
 
 			case '>': outRedirection();
+								break;
+			case '|': piping();
 								break;
 
 			default: process();
