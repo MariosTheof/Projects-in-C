@@ -39,7 +39,7 @@ void readLine(void)
 }
 
 /*Function that starts the process of executing */
-void process(void){
+void process(int commandType){
 
 	switch (pid = fork()) {
 		case -1:
@@ -47,6 +47,7 @@ void process(void){
 			exit(-1);
 
 		case 0:
+		 if (commandType == 0){
 			/*execlp goes first to run a shell command if there is one.
 			If not, then execv will execute a file of our own. */
 			execlp(args[0],args[0], args[1],NULL);
@@ -55,7 +56,9 @@ void process(void){
 
 			fprintf(stderr, "Oops! \n");
 			break;
-
+		} else if (commandType == 1) {
+			piping();
+		}
 
 		default:
 			waitPid = wait(&status);
@@ -171,6 +174,8 @@ int main(int argc, char* argv[])
 		printf(" %s > ", argv[0]);
 
   	readLine();
+		if (args[0] == NULL)
+			continue;
 
 		if (feof(stdin)){
 			break;
@@ -184,10 +189,10 @@ int main(int argc, char* argv[])
 
 			case '>': outRedirection();
 								break;
-			case '|': piping();
+			case '|': process(1);
 								break;
 
-			default: process();
+			default: process(0);
 							 break;
 		}
 
