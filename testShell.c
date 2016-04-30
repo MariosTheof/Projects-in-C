@@ -73,30 +73,6 @@ void process(int commandType){
 
 }
 
-/*Checks for a special symbol in our command such as "<" or ">" */
-int findSpecialSymbol(void){
-	int i,numOfSpSym = 0;
-	char c;
-	bool booleanOutput = false;
-	bool booleanInput = false;
-	for ( i = 0; args[i] != '\0'; i++){
-		if (!strcmp(args[i], ">")){
-			booleanOutput = true;
-			numOfSpSym++;
-		}
-	 	if (!strcmp(args[i], "<")){
-			booleanInput = true;
-			numOfSpSym++;
-		}
-
-		// if (!strcmp(args[i], "|"))
-		// 	return args[i][0];
-	}
-	return numOfSpSym;
-}
-
-
-
 	//Splits one command with arguments into two commands with arguments
 // void extractCommand(char* symbol) {
 //   int i;
@@ -191,20 +167,25 @@ int findSpecialSymbol(void){
 //
 // }
 
-int redirect_input(void) {
-	printf("HELLO");
+int redirect_input() {
+	printf("The North Remembers \n");
   int i;
   int j;
   for(i = 0; args[i] != NULL; i++) {
     if(args[i][0] == '<') {
-      free(args[i]);
+			printf("the lannisters pay their debts \n");
+      args[i] = NULL;
+			printf("the lannisters pay their debts \n");
       if(args[i+1] != NULL) {
+				printf("the lannisters pay their debts \n");
 	input_filename[0] = args[i+1];
+	printf("the lannisters pay their debts \n");
       } else {
 	return -1;
       }
-			// Adjust the rest of the arguments in the array
+			//Adjust the rest of the arguments in the array
       for(j = i; args[j-1] != NULL; j++) {
+				printf("ROAR! \n");
 	args[j] = args[j+2];
       }
     return 1;
@@ -223,7 +204,7 @@ int redirect_output(void) {
   for(i = 0; args[i] != NULL; i++) {
     // Look for the >
     if(args[i][0] == '>') {
-      free(args[i]);
+      args[i] = NULL;
       // Get the filename
       if(args[i+1] != NULL) {
 	output_filename[0] = args[i+1];
@@ -232,6 +213,7 @@ int redirect_output(void) {
       }
       // Adjust the rest of the arguments in the array
       for(j = i; args[j-1] != NULL; j++) {
+
 	args[j] = args[j+2];
       }
       return 1;
@@ -253,7 +235,7 @@ void inputOutput(void){
  	if (output == 1)
 		freopen(output_filename[0], "w+", stdout);
 
-	result =	execvp(args[0],args);
+		execvp(args[0],args);
 		exit(-1);
  }
  if (pid != 0 ){
@@ -272,6 +254,7 @@ int main(int argc, char* argv[])
 		printf(" %s > ", argv[0]);
 
   	readLine();
+		printf("The line is read! \n");
 		if (args[0] == NULL)
 			continue;
 
@@ -280,32 +263,16 @@ int main(int argc, char* argv[])
 		}else if(!strcmp(args[0], "exit")){
 			break;
 		}
-		printf ("can you enter?");
-		input = redirect_input();
+
+		input = redirect_input(args);
 		output = redirect_output();
-		switch (findSpecialSymbol()) {
-			case 0:	process(0);
-							break;
-			default:
+
 
 							printf("Sand is coarse and irrititating \n");
 
 							inputOutput();
 							break;
-		}
 
-		// switch(findSpecialSymbol()){
-		// 	case '<': inRedirection();
-		// 						break;
-		//
-		// 	case '>': outRedirection();
-		// 						break;
-		// 	case '|': process(1);
-		// 						break;
-		//
-		// 	default: process(0);
-		// 					 break;
-	 	//}
 
 	} // /while
 
