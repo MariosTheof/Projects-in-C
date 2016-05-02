@@ -9,20 +9,17 @@
 char fileName[256];
 char *args[129];
 pid_t pid,waitPid;
-int status,input,output;
+int status,input,output,myPipe;
 char *output_filename[5];
 char *input_filename[5];
+char *pipeCommand[5];
 
 typedef enum { false, true } bool;
 
 /*Reads a line from the terminal */
-void readLine(void)
-{
-
+void readLine(void){
 	if (fgets(fileName,sizeof(fileName), stdin) != 0){
-
 		fileName[strcspn(fileName, "\n")] = '\0'; //strcspn = string span ?
-
 
 			char **argv = args;
 			char *cmd = fileName;
@@ -35,159 +32,69 @@ void readLine(void)
 				cmd = 0;
 			}// /while
 
-
 			*argv = 0;
-	}
-	int i = 0;
-	while (args[i] != NULL){
-		printf("%s \n ",args[i]);
-		i++;
 	}
 }
 
 /*Function that starts the process of executing */
 void process(int commandType){
-
 	switch (pid = fork()) {
 		case -1:
 			printf("panic: can't fork\n");
 			exit(-1);
-
 		case 0:
 		 if (commandType == 0){
 			/*execlp goes first to run a shell command if there is one.
 			If not, then execv will execute a file of our own. */
 			execlp(args[0],args[0], args[1],NULL);
-
 			execv(args[0], args);
-
 			fprintf(stderr, "Oops! \n");
 			break;
-		}// else if (commandType == 1) {
-		// 	piping();
-		// }
-
+		}
 		default:
 			waitPid = wait(&status);
 		}
-
 }
 
-	//Splits one command with arguments into two commands with arguments
-// void extractCommand(char* symbol) {
-//   int i;
-//   int count = 0;
-//   for (i = 0; args[i] != NULL; i++)
-//       if (!strcmp(args[i], symbol)) {
-// 				printf ("word that will be nulled %s \n",args[i]);
-//          args[i] = NULL;
-//          while (args[i+1] != NULL) {
-//                args2[count] = args[i+1];
-// 							 printf ("word that will be nulled %s \n",args[i + 1]);
-//                args[i+1] = NULL;
-//                i++;
-//                count++;
-//          }
-//       }
-// 			i = 0;
-// 			while (args2[i] != NULL) {
-// 				printf ("This is args2[i] :  ");
-// 				printf("%s\n",args2[i] );
-// 				i++;
-// 			}
-// }
+int checkForPipes(void){
+ int i,j, x=0;
+ for (i = 0; args[i] != NULL; i++){
+  if (args[i][0] == '|'){
+ 	x=1;
+   args[i] = NULL;
+   //Get myPipe command
+   if (args[i + 1] !=  NULL) {
+    pipeCommand[0] = args[i + 1];
+   } else {
+    return -1;
+   }
+	 // Adjust the rest of the arguments in the array
+       for(j = i; args[j+1] != NULL; j++) {
+   args[j] = args[j+1];
+       }
+    args[j] = NULL;
+  }
+ }
+ if (x==1){return 1;}else{return 0;}
+}
 
-
-// //Redirects the standard output into a filename
-// void outRedirection(void) {
-// 	extractCommand(">");
-//   int fd;
-//   if ((pid = fork()) == -1) {
-//       perror("fork");
-//       exit(1);
-//   }
-//   if (pid == 0) {
-//       close(1);
-//       fd = creat(args2[0], 0644);
-// 			execvp(args[0], args);
-//       perror("execv");
-//       exit(1);
-//   }
-//   if (pid != 0) {
-//       wait(NULL);
-//
-// 			printf("Done ");
-//       printf(args[0]);
-//       printf(".\n");
-//   }
-// }
-//
-// //Reads from a file as standard input
-// void inRedirection(void) {
-// 	extractCommand("<");
-//   int fd;
-//   if ((pid = fork()) == -1) {
-//       perror("fork");
-//       exit(1);
-//   }
-//   if (pid == 0) {
-//       close(0);
-//       //open the file args2[0] and use it as standard input
-//       fd = open(args2[0], O_RDWR);
-//       execvp(args[0], args);
-//       perror("execv");
-//       exit(1);
-//   }
-//   if (pid != 0) {
-//       wait(NULL);
-// 			//	printf("I am the parent process %d \n",getpid());
-//       printf("Done ");
-//       printf(args[0]);
-// 			printf(".\n");
-//   }
-// }
-//
-// void piping(void) {
-// 	extractCommand("|");
-// 	int fd[2];
-// 	if(pipe(fd) < 0)
-// 		printf ("Cannot get a pipe\n");
-// 	if ((pid = fork()) == 0){
-// 		close(1);
-// 		dup(fd[1]);
-// 		close(fd[0]);
-// 		execvp(args[0],args);
-// 	} else if (pid > 0) {
-// 			close(0);
-// 			dup(fd[0]);
-// 			close(fd[1]);
-// 			execvp(args2[0],args2);
-// 	} else
-// 		printf("Unable to fork \n");
-//
-// }
-
-int redirect_input() {
-	printf("The North Remembers \n");
-  int i;
-  int j;
+/* */
+int redirectInput() {
+	int i,j;
   for(i = 0; args[i] != NULL; i++) {
     if(args[i][0] == '<') {
-			printf("the lannisters pay their debts \n");
       args[i] = NULL;
-			printf("the lannisters pay their debts \n");
       if(args[i+1] != NULL) {
-				printf("the lannisters pay their debts \n");
 	input_filename[0] = args[i+1];
-	printf("the lannisters pay their debts \n");
-      } else {
+	  } else {
 	return -1;
       }
-			//Adjust the rest of the arguments in the array
-      for(j = i; args[j-1] != NULL; j++) {
-				printf("ROAR! \n");
-	args[j] = args[j+2];
-      }
+		//	Adjust the rest of the arguments in the array
+       for(j = i; args[j-1] != NULL; j++) {
+	 			printf("ROAR! \n");
+	 args[j] = args[j+2];
+       }
+
     return 1;
     }
   }
@@ -197,10 +104,9 @@ int redirect_input() {
 /*
  * Check for output redirection
  */
-int redirect_output(void) {
+int redirectOutput(void) {
   int i;
   int j;
-
   for(i = 0; args[i] != NULL; i++) {
     // Look for the >
     if(args[i][0] == '>') {
@@ -211,19 +117,84 @@ int redirect_output(void) {
       } else {
 	return -1;
       }
-      // Adjust the rest of the arguments in the array
-      for(j = i; args[j-1] != NULL; j++) {
+			//	Adjust the rest of the arguments in the array
+	       for(j = i; args[j-1] != NULL; j++) {
+		 			printf("ROAR! \n");
+		 args[j] = args[j+2];
+	       }
 
-	args[j] = args[j+2];
-      }
+				printf("args[0] = %s\n",args[0] );
+				printf("args[1] = %s\n",args[1] );
+				printf("args[2] = %s\n",args[2] );
+				printf("args[3] = %s\n",args[3] );
+				printf("args[4] = %s\n",args[4] );
+				printf("args[5] = %s\n",args[5] );
+				printf("args[6] = %s\n",args[6] );
+				printf("args[7] = %s\n",args[7] );
+				printf("args[8] = %s\n",args[8] );
+				printf("args[9] = %s\n",args[9] );
+				printf("args[10] = %s\n",args[10] );
+
+
+
       return 1;
     }
   }
   return 0;
 }
 
+void piping(void){
+	if (input == 1)
+		freopen(input_filename[0], "r", stdin);
+
+	if (output == 1)
+		freopen(output_filename[0], "w+", stdout);
+
+	int fd[2];
+	if (pipe(fd) < 0)
+		printf("Cannot get a pipe \n" );
+	if ((pid = fork()) == 0){
+		close(1);
+		dup(fd[1]);
+		close(fd[0]);
+		execvp(args[0], args);
+	} else if (pid > 0){
+		close (0);
+		dup(fd[0]);
+		close(fd[1]);
+		execvp (pipeCommand[0],pipeCommand);
+	}else{
+		printf("Unable to fork\n");
+	}
+}
+
+void pipeLoop(char **args){
+	int i = 0;
+	int p[2];
+	int fd_in = 0;
+	while (args[i] != NULL){
+		pipe(p);
+		if ((pid = fork()) == -1){
+			perror("OH MEIN GOTT!");
+			exit(EXIT_FAILURE);
+		}else if (pid == 0){
+			dup2(fd_in, 0); //change the input according to the old one
+			if (args[i + 1] != NULL){
+				dup2(p[1],1);
+				close(p[0]);
+				execvp(args[0], *args);
+        exit(EXIT_FAILURE);
+			}else{
+				wait(NULL);
+				close(p[1]);
+				fd_in = p[0];//save the input for the next command
+				args++;
+			}
+		}
+	}
+}
+
 void inputOutput(void){
-	int result;
 	if ((pid = fork())== -1){
 		perror("fork");
 		exit(1);
@@ -250,11 +221,9 @@ int main(int argc, char* argv[])
 {
 	while(1)
 	{
-
 		printf(" %s > ", argv[0]);
-
   	readLine();
-		printf("The line is read! \n");
+
 		if (args[0] == NULL)
 			continue;
 
@@ -264,17 +233,17 @@ int main(int argc, char* argv[])
 			break;
 		}
 
-		input = redirect_input(args);
-		output = redirect_output();
+		input = redirectInput();
 
-
-							printf("Sand is coarse and irrititating \n");
-
-							inputOutput();
-							break;
-
-
+		output = redirectOutput();
+		myPipe = checkForPipes();
+		
+		if (myPipe == 1){
+			pipeLoop(args);
+		}
+		if (input == 1 || output == 1){
+			inputOutput();
+		}else{ process(0);}
 	} // /while
-
 	return 1;
 }
