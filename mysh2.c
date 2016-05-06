@@ -1,4 +1,4 @@
-/* My first personal shell */
+/* My second personal shell */
 #include<stdio.h>
 #include<stdlib.h>
 #include <string.h>
@@ -41,7 +41,7 @@ void process(void){
 		case 0:
       /*execlp goes first to run a shell command if there is one.
       If not, then execv will execute a file of our own. */
-      execlp(args[0],args[0],NULL);
+      execlp(args[0],args[0],args[1],NULL);
       execv(args[0], args);
 			fprintf(stderr, "OH MEIN GOTT! \n");
       exit(-1);
