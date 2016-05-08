@@ -1,4 +1,4 @@
-/* My first personal shell */
+/* My second personal shell */
 #include<stdio.h>
 #include<stdlib.h>
 #include <string.h>
